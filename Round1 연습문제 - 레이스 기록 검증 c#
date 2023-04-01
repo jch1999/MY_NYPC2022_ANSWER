@@ -1,0 +1,79 @@
+using System;
+class HelloWorld 
+{
+    static void Main()
+    {
+        string firstInputLine=Console.ReadLine();
+        string[] nmSplit=firstInputLine.Split(' ');
+        int N=int.Parse(nmSplit[0]);
+        int M=int.Parse(nmSplit[1]);
+        bool isCurrect=true;
+        
+        int[] timeList=new int[N+1];
+        int[] isEndList=new int[N+1];
+        for(int i=1;i<=N;i++)
+        {
+            timeList[i]=0;
+            isEndList[i]=1;
+        }
+        
+        for(int i=0;i<M;i++)
+        {
+            if(!isCurrect)
+                break;
+            
+            string inputLine=Console.ReadLine();
+            string[] tisSplit=inputLine.Split(' ');
+            int time=int.Parse(tisSplit[0]);
+            int userNum=int.Parse(tisSplit[1]);
+            int isEnd=int.Parse(tisSplit[2]);
+            
+            if(isEndList[userNum]!=isEnd)
+            {
+                //첫 입력 or 이미 레이스가 종료된 상태일 때 
+                //레이스 시작 정보가 들어오는 것은 정상이다.
+                if(timeList[userNum]==0||isEndList[userNum]==1)
+                {
+                    timeList[userNum]=time;
+                    isEndList[userNum]=isEnd;
+                }
+                //레이스 진행 상태에서 시간이 60초 이상 지난 시점에서 
+                //종료 정보가 들어오는 것은 정상이다.
+                else if(time-timeList[userNum]>=60)
+                {
+                    timeList[userNum]=time;
+                    isEndList[userNum]=isEnd;
+                }
+                else
+                {
+                    isCurrect=false;
+                }
+            }
+            else
+            {
+                isCurrect=false;
+            }
+        }
+        
+        isCurrect&=CheckIsAllEnd(isEndList);
+        
+        if(isCurrect)
+        {
+            Console.WriteLine("YES");
+        }
+        else
+        {
+            Console.WriteLine("NO");
+        }
+    }
+    
+    static bool CheckIsAllEnd(int[] isEndList)
+    {
+        for(int i=1;i<isEndList.Length;i++)
+        {
+            if(isEndList[i]==0)
+                return false;
+        }
+        return true;
+    }
+}
