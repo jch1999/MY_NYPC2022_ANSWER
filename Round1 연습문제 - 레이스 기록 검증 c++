@@ -1,0 +1,81 @@
+#include <iostream>
+#include <vector>
+
+#define FAST ios::sync_with_stdio(false);cin.tie(NULL);cout.tie(NULL);
+
+using namespace std;
+
+bool isAllEnd(int* isEndList,int listSize)
+{
+    for(int i=1;i<=listSize;i++)
+    {
+        if(isEndList[i]==0)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+int main()
+{
+    FAST
+    
+    int N,M;
+    bool isCurrect=true;
+    cin>>N>>M;
+    
+    int* timer=(int*)malloc(sizeof(int*)*(N+1));
+    int* isEnd=(int*)malloc(sizeof(int*)*(N+1));
+    for(int i=1;i<=N;i++)
+    {
+        timer[i]=0;
+        isEnd[i]=1;
+    }
+    
+    //올바르지 않은 기록이 있는가?
+    for(int i=0;i<M;i++)
+    {
+        int inputTime,inputUserNumber, inputIsEnd;
+        cin>>inputTime>>inputUserNumber>>inputIsEnd;
+        
+        if(isEnd[inputUserNumber]!=inputIsEnd)
+        {
+            if(timer[inputUserNumber]==0||isEnd[inputUserNumber]==1)
+            {
+                timer[inputUserNumber]=inputTime;
+                isEnd[inputUserNumber]=inputIsEnd;
+            }
+            else if(inputTime-timer[inputUserNumber]>=60)
+            {
+                timer[inputUserNumber]=inputTime;
+                isEnd[inputUserNumber]=inputIsEnd;
+            }
+            else
+            {
+                isCurrect=false;
+            }
+        }
+        else
+        {
+            isCurrect=false;
+        }
+    }
+    
+    //올바른 기록이며 모든 레이스가 종료되었는가?
+    isCurrect&=isAllEnd(isEnd,N);
+    
+    if(isCurrect)
+    {
+        cout<<"YES\n";
+    }
+    else
+    {
+        cout<<"NO\n";
+    }
+    
+    free(isEnd);
+    free(timer);
+
+    return 0;
+}
