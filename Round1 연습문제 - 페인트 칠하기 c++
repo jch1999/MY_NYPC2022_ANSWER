@@ -1,0 +1,127 @@
+//정리부터 해보자 행이나 열에 같은 색이 많은 색일 수록 먼저 칠해진다.
+//단 한 줄이 모두 같은 색인 경우에는 가장 나중에 칠해져야 하므로
+//먼저 한 줄이 같은 색인 경우를 찾는다.
+//그 다음 칠해진 수가 많은 색을 찾는다. 
+//칠해지는 순서는 행 vs 열로 비교해서 해당 수가 더 많은 쪽을 따라가도록 해야하나?
+//행이나 열 전체를 색칠한 것을 제외하고 그 나머지를 다 칠하는 것을 다시 제외하고 해서 구하는 건가?
+#include <iostream>
+#include <vector>
+#include <queue>
+
+#define FAST ios::sync_with_stdio(false);cin.tie(NULL);cout.tie(NULL);
+
+using namespace std;
+
+const int colorCnt=7;
+int row,col,checkedRow=0,checkedCol=0;
+vector<vector<int>> matrix;
+vector<vector<int>> matrixRowColorCnt;
+vector<vector<int>> matrixColColorCnt;
+priority_queue<pair<pair<int,int>,pair<string,int>>> answer;
+
+//행(matrixRowColorCnt), 열(matrixColColorCnt) 마다 색의 수를 구하기
+void CalcColorCnt()
+{
+    matrixRowColorCnt.resize(row);
+    for(int i=0;i<row;i++)
+    {
+        vector<int> rowColors(colorCnt);
+        for(int j=0;j<col;j++)
+        {
+            rowColors[matrix[i][j]]++;
+        }
+        matrixRowColorCnt[i]=rowColors;
+    }
+    
+    matrixColColorCnt.resize(col);
+    for(int i=0;i<col;i++)
+    {
+        vector<int> colColors(colorCnt);
+        for(int j=0;j<row;j++)
+        {
+            colColors[matrix[i][j]]++;
+        }
+        matrixColColorCnt[i]=colColors;
+    }
+}
+
+void FindLineBingo()
+{
+    //열이 모두 같은 색인지 판별하기 Find RowLine Bingo
+    for(int i=0;i<matrixRowColorCnt.size();i++)
+    {
+        for(int j=0;j<colorCnt;j++)
+        {
+            if(matrixRowColorCnt[i][j]==col-checkedCol)
+            {
+                answer.push({{checkedCol,i+1},{"H",j}});
+                checkedRow++;
+            }
+        }
+    }
+    
+    //행이 모두 같은 색인지 판별하기 Find ColLine Bingo
+    for(int i=0;i<matrixColColorCnt.size();i++)
+    {
+        for(int j=0;j<colorCnt;j++)
+        {
+            if(matrixColColorCnt[i][j]==row-checkedRow)
+            {
+                answer.push({{checkedRow,i+1},{"V",j}});
+                checkedCol++;
+            }
+        }
+    }
+}
+
+//N-row, M-col 입력 후 색칠판-matrix 초기화
+void Input()
+{
+   cin>>row>>col;
+    matrix.resize(row);
+    for(int i=0;i<row;i++)
+    {
+        matrix[i].resize(col);
+    }
+    
+    for(int i=0;i<row;i++)
+    {
+        for(int j=0;j<col;j++)
+        {
+            cin>>matrix[i][j];
+        }
+    } 
+}
+
+void Output()
+{
+    cout<<answer.size()<<'\n';
+    pair<pair<int,int>,pair<string,int>> answerPop;
+    while(!answer.empty())
+    {
+        answerPop=answer.top();
+        answer.pop();
+        
+        cout<<answerPop.second.first<<" "<<answerPop.first.second<<
+            " "<<answerPop.second.second<<'\n';
+        
+    }
+}
+
+int main()
+{
+    FAST
+    
+    Input();
+    
+    CalcColorCnt();
+    
+    while(checkedCol+checkedRow!=col)
+    {
+        FindLineBingo();
+    }
+    
+    Output();
+    
+    return 0;
+}
