@@ -5,6 +5,9 @@
 //칠해지는 순서는 행 vs 열로 비교해서 해당 수가 더 많은 쪽을 따라가도록 해야하나?
 //행이나 열 전체를 색칠한 것을 제외하고 그 나머지를 다 칠하는 것을 다시 제외하고 해서 구하는 건가?
 //꼬였다... 일단 임시 저장하자
+//아 이런 문제를 잘 못 읽었어 아니 제대로 안 읽었네...
+//0은 색이 칠해져 있지 않거나 어떤 색이 칠해지든 상관 없음을 의미한다였네..
+//다시 짜기 전에 임시저장
 #include <iostream>
 #include <vector>
 #include <queue>
@@ -17,51 +20,45 @@ const int colorCnt=7;
 int row,col,checkedRow=0,checkedCol=0;
 vector<vector<int>> matrix;
 vector<vector<int>> matrixRowColorCnt;
-vector<int> rowCheckedCnt;
+vector<bool> isCheckedRow;
+vector<bool> isCheckedCol;
 vector<vector<int>> matrixColColorCnt;
-vector<int> colCheckedCnt;
 priority_queue<pair<pair<int,int>,pair<string,int>>> answer;
 
-bool FindLineBingo()
+void FindLineBingo()
 {
-    bool isChecking=false;
-    //열이 모두 같은 색인지 판별하기 Find RowLine Bingo
-    for(int i=0;i<matrixRowColorCnt.size();i++)
+    while(checkedRow!=row||checkedCol!=col)
     {
-        for(int j=0;j<colorCnt;j++)
+        for(int i=0;i<row;i++)
         {
-            if(matrixRowColorCnt[i][j]==col-rowCheckedCnt[i])
+            if(isCheckedRow[i])
+                continue;
+            for(int j=0;j<colorCnt;j++)
             {
-                answer.push({{rowCheckedCnt[i],i+1},{"H",j}});
-                rowCheckedCnt[i]++;
-                for(int k=0;k<col;k++)
+                if(matrixRowColorCnt[i][j]>=col-checkedCol)
                 {
-                    colCheckedCnt[k]++;
+                    checkedRow++;
+                    answer.push({{checkedCol,i+1},{"H",j}});
+                    isCheckedRow[i]=true;
                 }
-                isChecking=true;
+            }
+        }
+        
+        for(int i=0;i<col;i++)
+        {
+            if(isCheckedCol[i])
+                continue;
+            for(int j=0;j<colorCnt;j++)
+            {
+                if(matrixRowColorCnt[i][j]>=row-checkedRow)
+                {
+                    checkedCol++;
+                    answer.push({{checkedRow,i+1},{"V",j}});
+                    isCheckedCol[i]=true;
+                }
             }
         }
     }
-
-    //행이 모두 같은 색인지 판별하기 Find ColLine Bingo
-    for(int i=0;i<matrixColColorCnt.size();i++)
-    {
-        for(int j=0;j<colorCnt;j++)
-        {
-            if(matrixColColorCnt[i][j]==row-colCheckedCnt[i])
-            {
-                answer.push({{colCheckedCnt[i],i+1},{"V",j}});
-                colCheckedCnt[i]++;
-                for(int k=0;k<row;k++)
-                {
-                    rowCheckedCnt[k]++;
-                }
-                isChecking=true;
-            }
-        }
-    }
-    
-    return isChecking;
 }
 
 //N-row, M-col 입력 후 색칠판-matrix 초기화
@@ -71,8 +68,8 @@ void Input()
     matrix.resize(row);
     matrixRowColorCnt.resize(row);
     matrixColColorCnt.resize(col);
-    rowCheckedCnt.resize(row);
-    colCheckedCnt.resize(col);
+    isCheckedRow.resize(row);
+    isCheckedCol.resize(col);
     
     for(int i=0;i<row;i++)
     {
@@ -116,11 +113,8 @@ int main()
 
     Input();
     
-    while(FindLineBingo())
-    {
-        
-    }
-
+    FindLineBingo();
+    
     Output();
 
     return 0;
