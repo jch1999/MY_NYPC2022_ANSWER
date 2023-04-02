@@ -1,15 +1,17 @@
-//정리부터 해보자 행이나 열에 같은 색이 많은 색일 수록 먼저 칠해진다.
-//단 한 줄이 모두 같은 색인 경우에는 가장 나중에 칠해져야 하므로
-//먼저 한 줄이 같은 색인 경우를 찾는다.
-//그 다음 칠해진 수가 많은 색을 찾는다. 
-//칠해지는 순서는 행 vs 열로 비교해서 해당 수가 더 많은 쪽을 따라가도록 해야하나?
-//행이나 열 전체를 색칠한 것을 제외하고 그 나머지를 다 칠하는 것을 다시 제외하고 해서 구하는 건가?
-//꼬였다... 일단 임시 저장하자
-//아 이런 문제를 잘 못 읽었어 아니 제대로 안 읽었네...
-//0은 색이 칠해져 있지 않거나 어떤 색이 칠해지든 상관 없음을 의미한다였네..
-//다시 짜기 전에 임시저장
+//전체 색의 수,
+//행별 전체 색의 수와 행에 존재하는 색마다의 수,
+//열별 전체 색의 수와 열에 존재하는 색마다의 수를 비교하여
+//줄(행 or 열)의 전체 색의 수와 색의 수가 일치하는 경우 해당 줄을 queue에 넣고
+//해당 줄과 교차하는 줄의 해당 색에 대한 정보 변화(갯수 감소)
+//일치하는 줄 지우기
+//남은 줄들 가지고 반복
+
+//삼중 반복문 아닌 거 같은데...
+//교차하는 선에서 제외되는 색의 정보를 변경해야 하는데..
+//런타임 초과가 뜨네...
 #include <iostream>
 #include <vector>
+#include <algorithm>
 #include <queue>
 
 #define FAST ios::sync_with_stdio(false);cin.tie(NULL);cout.tie(NULL);
@@ -17,105 +19,111 @@
 using namespace std;
 
 const int colorCnt=7;
-int row,col,checkedRow=0,checkedCol=0;
-vector<vector<int>> matrix;
-vector<vector<int>> matrixRowColorCnt;
-vector<bool> isCheckedRow;
-vector<bool> isCheckedCol;
-vector<vector<int>> matrixColColorCnt;
-priority_queue<pair<pair<int,int>,pair<string,int>>> answer;
 
-void FindLineBingo()
+int main()
 {
-    while(checkedRow!=row||checkedCol!=col)
+    FAST
+    
+    int row,col;//row - N | col - M
+    cin>>row>>col;
+    
+    vector<vector<int>> matrix;//입력된 판
+    vector<int> rowsColorCnt[row];//행에 속한 각 색의 수(색 별로 분리)
+    vector<int> rowsTotalCnt(row);//행에 존재하는 색의 총 수
+    vector<int> colsColorCnt[col];//열에 속한 각 색의 수
+    vector<int> colsTotalCnt(col);//열에 존재하는 색의 총 수
+    int colorSum=0;
+    
+    priority_queue<pair<pair<int,string>,pair<int,int>>> answer;
+    
+    matrix.resize(row);
+    for(int i=0;i<row;i++)
+    {
+        matrix[i].resize(col);
+        rowsColorCnt[i].resize(colorCnt+1);
+    }
+    for(int i=0;i<col;i++)
+    {
+        colsColorCnt[i].resize(colorCnt+1);
+    }
+    
+    for(int i=0;i<row;i++)
+    {
+        for(int j=0;j<col;j++)
+        {
+            cin>>matrix[i][j];
+            //0은 계산에 넣을 필요 없으므로 무시
+            if(matrix[i][j]!=0)
+            {
+                rowsColorCnt[i][matrix[i][j]]++;
+                rowsTotalCnt[i]++;
+                colsColorCnt[j][matrix[i][j]]++;
+                colsTotalCnt[j]++;
+                colorSum++;
+            }
+        }
+    }
+    
+    int cnt=0;
+    while(colorSum!=0)
     {
         for(int i=0;i<row;i++)
         {
-            if(isCheckedRow[i])
-                continue;
-            for(int j=0;j<colorCnt;j++)
+            for(int j=1;j<=colorCnt;j++)
             {
-                if(matrixRowColorCnt[i][j]>=col-checkedCol)
+                if(rowsColorCnt[i][j]==0)
+                    continue;
+                
+                if(rowsTotalCnt[i]==rowsColorCnt[i][j])
                 {
-                    checkedRow++;
-                    answer.push({{checkedCol,i+1},{"H",j}});
-                    isCheckedRow[i]=true;
+                    colorSum-=rowsTotalCnt[i];
+                    rowsTotalCnt[i]=0;
+                    
+                    for(int k=0;k<col;j++)
+                    {
+                        if(matrix[i][k]==j)
+                        {
+                            colsTotalCnt[k]--;
+                            colsColorCnt[k][j]--;
+                        }
+                    }
+                    
+                    answer.push({{cnt++,"H"},{i+1,j}});
                 }
             }
         }
         
         for(int i=0;i<col;i++)
         {
-            if(isCheckedCol[i])
-                continue;
-            for(int j=0;j<colorCnt;j++)
+            for(int j=1;j<=colorCnt;j++)
             {
-                if(matrixRowColorCnt[i][j]>=row-checkedRow)
+                if(rowsColorCnt[i][j]==0)
+                    continue;
+                
+                if(colsTotalCnt[i]==colsColorCnt[i][j])
                 {
-                    checkedCol++;
-                    answer.push({{checkedRow,i+1},{"V",j}});
-                    isCheckedCol[i]=true;
+                    colorSum-=colsTotalCnt[i];
+                    colsTotalCnt[i]=0;
+                    for(int k=0;k<row;j++)
+                    {
+                        if(matrix[k][i]==j)
+                        {
+                            rowsTotalCnt[k]--;
+                            rowsColorCnt[k][j]--;
+                        }
+                    }
+                    
+                    answer.push({{cnt++,"V"},{i+1,j}});
                 }
             }
         }
     }
-}
-
-//N-row, M-col 입력 후 색칠판-matrix 초기화
-void Input()
-{
-    cin>>row>>col;
-    matrix.resize(row);
-    matrixRowColorCnt.resize(row);
-    matrixColColorCnt.resize(col);
-    isCheckedRow.resize(row);
-    isCheckedCol.resize(col);
     
-    for(int i=0;i<row;i++)
-    {
-        matrix[i].resize(col);
-        matrixRowColorCnt[i].resize(colorCnt);
-    }
-    for(int i=0;i<col;i++)
-    {
-        matrixColColorCnt[i].resize(colorCnt);
-    }
-
-    for(int i=0;i<row;i++)
-    {
-        for(int j=0;j<col;j++)
-        {
-            cin>>matrix[i][j];
-            matrixRowColorCnt[i][matrix[i][j]]++;
-            matrixColColorCnt[j][matrix[i][j]]++;
-        }
-    } 
-}
-
-void Output()
-{
-    cout<<answer.size()<<'\n';
-    pair<pair<int,int>,pair<string,int>> answerPop;
     while(!answer.empty())
     {
-        answerPop=answer.top();
+        pair<pair<int,string>,pair<int,int>> pop=answer.top();
         answer.pop();
-
-        cout<<answerPop.second.first<<" "<<answerPop.first.second<<
-            " "<<answerPop.second.second<<'\n';
-
+        cout<<pop.first.second<<" "<<pop.second.first<<" "<<pop.second.second<<'\n';
     }
-}
-
-int main()
-{
-    FAST
-
-    Input();
-    
-    FindLineBingo();
-    
-    Output();
-
     return 0;
 }
