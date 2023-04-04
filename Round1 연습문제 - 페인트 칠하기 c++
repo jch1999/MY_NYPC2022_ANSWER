@@ -9,6 +9,13 @@
 //삼중 반복문 아닌 거 같은데...
 //교차하는 선에서 제외되는 색의 정보를 변경해야 하는데..
 //런타임 초과가 뜨네...
+//사중 반복문이었네...
+
+//이중 백터로 만든 다음, [row_index][colorNum]에 색이 존재하는 col값을 저장
+//이중 백터로 만든 다음, [col_index][colorNum]에 색이 존재하는 row값을 저장
+//이러면 따로 갯수를 저장하는 배열 필요 없이 vector.size()를 호출하면 되기는 할 텐데..
+//vector.erase였나? remove였나? 그걸로 지우면거고..
+//사중 반복문을 없애야 하는데 이러면 되려나?
 #include <iostream>
 #include <vector>
 #include <algorithm>
