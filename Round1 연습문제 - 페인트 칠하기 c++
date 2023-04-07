@@ -1,3 +1,114 @@
+
+#include <algorithm>
+#include <iostream>
+#include <queue>
+#include <vector>
+
+#define FAST ios::sync_with_stdio(false);cin.tie(NULL);cout.tie(NULL);
+
+using namespace std;
+
+int main()
+{
+  FAST
+
+  int row,col,totalColorCnt=0;
+  vector<vector<int>> matrix;
+  vector<pair<string,pair<int,int>>> result;
+  cin>>row>>col;
+  matrix.resize(row);
+  for(int i=0;i<row;i++)
+  {
+    matrix[i].resize(col);
+  }
+
+  //input
+  for(int i=0;i<row;i++)
+  {
+    for(int j=0;j<col;j++)
+    {
+      cin>>matrix[i][j];
+      if(matrix[i][j]!=0)
+        totalColorCnt++;
+    }
+  }
+  while(totalColorCnt!=0)
+  {
+    for(int i=0;i<row;i++)
+    {
+      int rowColor=0;
+      bool rowEqual=true;
+      int colorCnt=0;
+      for(int j=0;j<col;j++)
+      {
+        if(matrix[i][j]==0)
+          continue;
+        if(rowColor==0)
+        {    
+          rowColor=matrix[i][j];
+          colorCnt=1;
+        }
+        else if(rowColor!=matrix[i][j])
+        {
+          rowEqual=false;
+          break;
+        }
+        else
+        {
+          colorCnt++;
+        }
+          
+      }
+      if(rowEqual)
+      {
+        totalColorCnt-=colorCnt;
+        result.push_back({"H",{i+1,rowColor}});
+        for(int j=0;j<col;j++)
+          matrix[i][j]=0;
+      }
+    }
+    
+    for(int i=0;i<col;i++)
+    {
+      int colColor=0;
+      bool colEqual=true;
+      int colorCnt=0;
+      for(int j=0;j<row;j++)
+      {
+        if(matrix[j][i]==0)
+          continue;
+        if(colColor==0)
+        {    
+          colColor=matrix[j][i];
+          colorCnt=1;
+        }
+        else if(colColor!=matrix[j][i])
+        {
+          colEqual=false;
+          break;
+        }
+        else
+        {
+          colorCnt++;
+        }
+          
+      }
+      if(colEqual)
+      {
+        totalColorCnt-=colorCnt;
+        result.push_back({"V",{i+1,colColor}});
+        for(int j=0;j<col;j++)
+          matrix[j][i]=0;
+      }
+    }
+  }
+  reverse(result.begin(),result.end());
+  for(int i=0;i<result.size();i++)
+  {
+    cout<<result[i].first<<" "<<result[i].second.first<<" "<<result[i].second.second<<'\n';
+  }
+return 0;
+}
 //전체 색의 수,
 //행별 전체 색의 수와 행에 존재하는 색마다의 수,
 //열별 전체 색의 수와 열에 존재하는 색마다의 수를 비교하여
@@ -19,107 +130,4 @@
 //..........차라리 map을 써볼까?
 //행별, 열별 존재하는 색의 종류를 저장하는 백터 -> 종류가 1개일 경우 해당 줄을
 //제거
-
-//2023-04-06 실패 4중을 3중으로 줄였으나 여전히 runtime exceed
-//find 호출하면 찾는다고 반복이 발생할 거 같은데 그럼 사중인가?
-
-#include <algorithm>
-#include <iostream>
-#include <queue>
-#include <vector>
-
-#define FAST ios::sync_with_stdio(false);cin.tie(NULL);cout.tie(NULL);
-
-using namespace std;
-
-const int colorCnt = 7;
-
-int main() {
-  FAST
-
-      int row,
-      col; // row - N | col - M
-  cin >> row >> col;
-
-  vector<vector<int>> matrix(row); //입력된 판
-  vector<vector<int>> rows(row);//행별 존재하는 색을 저장
-  vector<int> rowCnt(row);//행별 색의 수
-  vector<vector<int>> rowColors(row);//행별로 존재하는 색의 번호를 저장
-  vector<vector<int>> cols(col);//열별로 존재하는 색을 저장
-  vector<int> colCnt(col);//열별로 존재하는 색의 수를 저장
-  vector<vector<int>> colColors(col);//열별로 존재하는 색의 번호를 저장
-  vector<pair<string, pair<int, int>>> result;//제거 가능한 줄을 저장
-  int totalColorCnt = 0;
-
-  for (int i = 0; i < row; i++) {
-    matrix[i].resize(col);
-    rows[i].resize(colorCnt + 1);
-  }
-  for (int i = 0; i < col; i++) {
-    cols[i].resize(colorCnt + 1);
-  }
-  for (int i = 0; i < row; i++) {
-    for (int j = 0; j < col; j++) {
-      cin >> matrix[i][j];
-      if (matrix[i][j] != 0) {
-        rows[i][matrix[i][j]]++;
-        cols[j][matrix[i][j]]++;
-        totalColorCnt++;
-        rowCnt[i]++;
-        colCnt[j]++;
-        if (find(rowColors[i].begin(), rowColors[i].end(), matrix[i][j]) ==
-            rowColors[i].end() + 1) {
-          rowColors[i].push_back(matrix[i][j]);
-        }
-        if (find(colColors[i].begin(), colColors[i].end(), matrix[i][j]) ==
-            colColors[i].end() + 1) {
-          colColors[i].push_back(matrix[i][j]);
-        }
-      }
-    }
-  }
-
-  while (totalColorCnt != 0) {
-    for (int i = 0; i < row; i++) {
-      if (rowColors[i].size() == 1) {
-        for (int j = 0; j < col; j++) {
-          if (matrix[i][j] == rowColors[i][0]) {
-            colCnt[j]--;
-            cols[j][rowColors[i][0]]--;
-            if (cols[j][rowColors[i][0]] == 0) {
-              colColors[j].erase(find(colColors[j].begin(), colColors[j].end(),
-                                      rowColors[i][0]));
-            }
-          }
-        }
-        rowColors[i].erase(rowColors[i].begin());
-        result.push_back({"H", {i + 1, rowColors[i][0]}});
-        totalColorCnt--;
-      }
-    }
-    for (int i = 0; i < col; i++) {
-      if (colColors[i].size() == 1) {
-        for (int j = 0; j < row; j++) {
-          if (matrix[j][i] == rowColors[i][0]) {
-            rowCnt[j]--;
-            rows[j][colColors[i][0]]--;
-            if (rows[j][colColors[i][0]] == 0) {
-              rowColors[j].erase(find(rowColors[j].begin(), rowColors[j].end(),
-                                      colColors[i][0]));
-            }
-          }
-        }
-        colColors[i].erase(colColors[i].begin());
-        result.push_back({"V", {i + 1, colColors[i][0]}});
-        totalColorCnt--;
-      }
-    }
-  }
-
-  reverse(result.begin(), result.end());
-  for (int i = 0; i < result.size(); i++) {
-    cout << result[i].first << " " << result[i].second.first << " "
-         << result[i].second.second << '\n';
-  }
-  return 0;
-}
+//
