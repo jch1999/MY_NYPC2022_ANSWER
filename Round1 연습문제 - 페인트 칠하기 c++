@@ -32,6 +32,7 @@ int main()
         totalColorCnt++;
     }
   }
+  
   while(totalColorCnt!=0)
   {
     for(int i=0;i<row;i++)
@@ -59,7 +60,7 @@ int main()
         }
           
       }
-      if(rowEqual)
+      if(rowEqual&&rowColor!=0)
       {
         totalColorCnt-=colorCnt;
         result.push_back({"H",{i+1,rowColor}});
@@ -93,11 +94,11 @@ int main()
         }
           
       }
-      if(colEqual)
+      if(colEqual&&colColor!=0)
       {
         totalColorCnt-=colorCnt;
         result.push_back({"V",{i+1,colColor}});
-        for(int j=0;j<col;j++)
+        for(int j=0;j<row;j++)
           matrix[j][i]=0;
       }
     }
@@ -130,4 +131,4 @@ return 0;
 //..........차라리 map을 써볼까?
 //행별, 열별 존재하는 색의 종류를 저장하는 백터 -> 종류가 1개일 경우 해당 줄을
 //제거
-//
+//다 지우고 다시 해보니 힘들게 여러 백터 만들어서 관리할 필요가 없었다는 걸 알게 되었다...
