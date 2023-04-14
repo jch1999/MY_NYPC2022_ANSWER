@@ -1,0 +1,139 @@
+//답이 이상하게 나오네..
+//수정 필요 임시저장
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.IO;
+using System.Text;
+
+class HelloWorld 
+{
+    static void Main() 
+    {
+        //한 번에 읽어와서 한 줄씩 가져다 쓰는 거?
+        StreamReader sr=new StreamReader(Console.OpenStandardInput());
+        StringBuilder sb=new StringBuilder();
+        
+        string[] nmSplit=sr.ReadLine().Split(' ');
+        int n=int.Parse(nmSplit[0]);
+        int m=int.Parse(nmSplit[1]);
+        List<List<string>> matrix=new List<List<string>>();
+        List<string> result=new List<string>();
+        
+        int totalCnt=0;
+        
+        for(int i=0;i<n;i++)
+        {
+            string[] input=sr.ReadLine().Split(' ');
+            matrix.Add(new List<string>());
+            
+            for(int j=0;j<input.Length;j++)
+            {
+                matrix[i].Add(input[j]);
+                if(matrix[i][j]!="0")
+                {
+                    totalCnt++;
+                }
+            }
+        }
+        
+        while(totalCnt!=0)
+        {
+            for(int i=0;i<n;i++)
+            {
+                bool isAllSame=true;
+                int rowColor=0;
+                int colorCnt=0;
+                for(int j=0;j<m;j++)
+                {
+                    if(matrix[i][j]!="0")
+                    {
+                        if(rowColor==int.Parse(matrix[i][j]))
+                        {
+                            colorCnt++;
+                            continue;
+                        }
+                        else
+                        {
+                            if(rowColor==0)
+                            {
+                                rowColor=int.Parse(matrix[i][j]);
+                                colorCnt++;
+                            }
+                            else
+                            {
+                                isAllSame=false;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if(isAllSame)
+                {
+                    if(rowColor==0)
+                        continue;
+                    result.Add("H "+(i+1)+" "+rowColor);
+                    totalCnt-=colorCnt;
+                    for(int j=0;j<m;j++)
+                    {
+                        matrix[i][j]="0";
+                    }
+                }
+                
+            }
+            
+            for(int i=0;i<m;i++)
+            {
+                bool isAllSame=true;
+                int colColor=0;
+                int colorCnt=0;
+                for(int j=0;j<n;j++)
+                {
+                    if(matrix[j][i]!="0")
+                    {
+                        if(colColor==int.Parse(matrix[j][i]))
+                        {
+                            colorCnt++;
+                            continue;
+                        }
+                        else
+                        {
+                            if(colColor==0)
+                            {
+                                colColor=int.Parse(matrix[j][i]);
+                                colorCnt++;
+                            }
+                            else
+                            {
+                                isAllSame=false;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if(isAllSame)
+                {
+                    if(colColor==0)
+                        continue;
+                    result.Add("V "+(i+1)+" "+colColor);
+                    totalCnt-=colorCnt;
+                    for(int j=0;j<n;j++)
+                    {
+                        matrix[j][i]="0";
+                    }
+                }
+                
+            }
+        }
+        result.Reverse();
+        
+        foreach(var text in result)
+        {
+            sb.AppendLine(text);
+        }
+        
+        sr.Close();
+        
+        Console.WriteLine(sb.ToString());
+    }
+}
