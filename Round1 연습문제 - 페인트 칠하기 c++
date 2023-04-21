@@ -1,114 +1,122 @@
-
 #include <algorithm>
 #include <iostream>
 #include <queue>
 #include <vector>
 
-#define FAST ios::sync_with_stdio(false);cin.tie(NULL);cout.tie(NULL);
+#define FAST ios::sync_with_stdio(false), cin.tie(NULL), cout.tie(NULL);
 
 using namespace std;
 
-int main()
-{
+int main() {
   FAST
 
-  int row,col,totalColorCnt=0;
+      int row,
+      col, totalColorCnt = 0;
   vector<vector<int>> matrix;
-  vector<pair<string,pair<int,int>>> result;
-  cin>>row>>col;
+  vector<pair<string, pair<int, int>>> result;
+  cin >> row >> col;
   matrix.resize(row);
-  for(int i=0;i<row;i++)
-  {
+  for (int i = 0; i < row; i++) {
     matrix[i].resize(col);
   }
 
-  //input
-  for(int i=0;i<row;i++)
-  {
-    for(int j=0;j<col;j++)
-    {
-      cin>>matrix[i][j];
-      if(matrix[i][j]!=0)
+  // input
+  for (int i = 0; i < row; i++) {
+    for (int j = 0; j < col; j++) {
+      cin >> matrix[i][j];
+      if (matrix[i][j] != 0)
         totalColorCnt++;
     }
   }
-  
-  while(totalColorCnt!=0)
-  {
-    for(int i=0;i<row;i++)
-    {
-      int rowColor=0;
-      bool rowEqual=true;
-      int colorCnt=0;
-      for(int j=0;j<col;j++)
-      {
-        if(matrix[i][j]==0)
+
+  while (totalColorCnt != 0) {
+    int maxColorCnt = 0;
+    string VerHor;
+    int lineNum;
+    int nowColorIndex;
+
+    for (int i = 0; i < row; i++) {
+      int rowColor = 0;
+      bool rowEqual = true;
+      int colorCnt = 0;
+      for (int j = 0; j < col; j++) {
+        if (matrix[i][j] == 0)
           continue;
-        if(rowColor==0)
-        {    
-          rowColor=matrix[i][j];
-          colorCnt=1;
-        }
-        else if(rowColor!=matrix[i][j])
-        {
-          rowEqual=false;
+        if (rowColor == 0) {
+          rowColor = matrix[i][j];
+          colorCnt = 1;
+        } else if (rowColor != matrix[i][j]) {
+          rowEqual = false;
           break;
-        }
-        else
-        {
+        } else {
           colorCnt++;
         }
-          
       }
-      if(rowEqual&&rowColor!=0)
-      {
-        totalColorCnt-=colorCnt;
-        result.push_back({"H",{i+1,rowColor}});
-        for(int j=0;j<col;j++)
-          matrix[i][j]=0;
+      if (rowEqual && rowColor != 0) {
+        // totalColorCnt-=colorCnt;
+        // result.push_back({"H",{i+1,rowColor}});
+        // for(int j=0;j<col;j++)
+        //   matrix[i][j]=0;
+        if (colorCnt > maxColorCnt) {
+          maxColorCnt = colorCnt;
+          VerHor = "H";
+          lineNum = i;
+          nowColorIndex = rowColor;
+        }
       }
     }
-    
-    for(int i=0;i<col;i++)
-    {
-      int colColor=0;
-      bool colEqual=true;
-      int colorCnt=0;
-      for(int j=0;j<row;j++)
-      {
-        if(matrix[j][i]==0)
+
+    for (int i = 0; i < col; i++) {
+      int colColor = 0;
+      bool colEqual = true;
+      int colorCnt = 0;
+      for (int j = 0; j < row; j++) {
+        if (matrix[j][i] == 0)
           continue;
-        if(colColor==0)
-        {    
-          colColor=matrix[j][i];
-          colorCnt=1;
-        }
-        else if(colColor!=matrix[j][i])
-        {
-          colEqual=false;
+        if (colColor == 0) {
+          colColor = matrix[j][i];
+          colorCnt = 1;
+        } else if (colColor != matrix[j][i]) {
+          colEqual = false;
           break;
-        }
-        else
-        {
+        } else {
           colorCnt++;
         }
-          
       }
-      if(colEqual&&colColor!=0)
-      {
-        totalColorCnt-=colorCnt;
-        result.push_back({"V",{i+1,colColor}});
-        for(int j=0;j<row;j++)
-          matrix[j][i]=0;
+      if (colEqual && colColor != 0) {
+        // totalColorCnt-=colorCnt;
+        // result.push_back({"V",{i+1,colColor}});
+        // for(int j=0;j<row;j++)
+        //   matrix[j][i]=0;
+        if (colorCnt > maxColorCnt) {
+          maxColorCnt = colorCnt;
+          VerHor = "V";
+          lineNum = i;
+          nowColorIndex = colColor;
+        }
+      }
+    }
+
+    totalColorCnt -= maxColorCnt;
+    result.push_back({VerHor, {lineNum + 1, nowColorIndex}});
+
+    if (VerHor == "V") {
+      for (int j = 0; j < row; j++) {
+        matrix[j][lineNum] = 0;
+      }
+    } else {
+      for (int j = 0; j < col; j++) {
+        matrix[lineNum][j] = 0;
       }
     }
   }
-  reverse(result.begin(),result.end());
-  for(int i=0;i<result.size();i++)
-  {
-    cout<<result[i].first<<" "<<result[i].second.first<<" "<<result[i].second.second<<'\n';
+
+  reverse(result.begin(), result.end());
+  for (int i = 0; i < result.size(); i++) {
+    cout << result[i].first << " " << result[i].second.first << " "
+         << result[i].second.second << '\n';
   }
-return 0;
+  return 0;
 }
 //전체 색의 수,
 //행별 전체 색의 수와 행에 존재하는 색마다의 수,
@@ -131,4 +139,8 @@ return 0;
 //..........차라리 map을 써볼까?
 //행별, 열별 존재하는 색의 종류를 저장하는 백터 -> 종류가 1개일 경우 해당 줄을
 //제거
-//다 지우고 다시 해보니 힘들게 여러 백터 만들어서 관리할 필요가 없었다는 걸 알게 되었다...
+//다 지우고 다시 해보니 힘들게 여러 백터 만들어서 관리할 필요가 없었다는 걸 알게
+//되었다... 음.. 오답이 나오는 걸 확인했고.. 0울 제외한 색이 전부 같으면서 그
+// 색의 수가 가장 많은 줄을 지우도록 변경하면 되려나?
+// 1차 수정 결과: 확인도 하지 못하고 Runtime Exceed 발생.
+// 수정 완료
