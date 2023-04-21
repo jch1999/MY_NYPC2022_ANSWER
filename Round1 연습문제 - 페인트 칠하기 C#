@@ -1,5 +1,6 @@
 //답이 이상하게 나오네..
 //수정 필요 임시저장
+//수정 완료
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,7 +28,7 @@ class HelloWorld
             string[] input=sr.ReadLine().Split(' ');
             matrix.Add(new List<string>());
             
-            for(int j=0;j<input.Length;j++)
+            for(int j=0;j<m;j++)
             {
                 matrix[i].Add(input[j]);
                 if(matrix[i][j]!="0")
@@ -37,8 +38,11 @@ class HelloWorld
             }
         }
         
+        int nowColor=0,nowMaxCnt=0,nowLineIndex=0;
+        string VerHor="";
         while(totalCnt!=0)
         {
+            nowMaxCnt=0;
             for(int i=0;i<n;i++)
             {
                 bool isAllSame=true;
@@ -72,11 +76,18 @@ class HelloWorld
                 {
                     if(rowColor==0)
                         continue;
-                    result.Add("H "+(i+1)+" "+rowColor);
-                    totalCnt-=colorCnt;
-                    for(int j=0;j<m;j++)
+                    // result.Add("H "+(i+1)+" "+rowColor);
+                    // totalCnt-=colorCnt;
+                    // for(int j=0;j<m;j++)
+                    // {
+                    //     matrix[i][j]="0";
+                    // }
+                    if(colorCnt>nowMaxCnt)
                     {
-                        matrix[i][j]="0";
+                        nowMaxCnt=colorCnt;
+                        VerHor="H";
+                        nowColor=rowColor;
+                        nowLineIndex=i;
                     }
                 }
                 
@@ -115,16 +126,43 @@ class HelloWorld
                 {
                     if(colColor==0)
                         continue;
-                    result.Add("V "+(i+1)+" "+colColor);
-                    totalCnt-=colorCnt;
-                    for(int j=0;j<n;j++)
+                    // result.Add("V "+(i+1)+" "+colColor);
+                    // totalCnt-=colorCnt;
+                    // for(int j=0;j<n;j++)
+                    // {
+                    //     matrix[j][i]="0";
+                    // }
+                    if(colorCnt>nowMaxCnt)
                     {
-                        matrix[j][i]="0";
+                        nowMaxCnt=colorCnt;
+                        VerHor="V";
+                        nowColor=colColor;
+                        nowLineIndex=i;
                     }
                 }
                 
             }
+            
+            if(VerHor=="H")
+            {
+                result.Add("H "+(nowLineIndex+1)+" "+nowColor);
+                totalCnt-=nowMaxCnt;
+                for(int j=0;j<m;j++)
+                {
+                    matrix[nowLineIndex][j]="0";
+                }
+            }
+            else
+            {
+                result.Add("V "+(nowLineIndex+1)+" "+nowColor);
+                totalCnt-=nowMaxCnt;
+                for(int j=0;j<n;j++)
+                {
+                    matrix[j][nowLineIndex]="0";
+                }
+            }
         }
+        
         result.Reverse();
         
         foreach(var text in result)
